@@ -8,13 +8,12 @@
 #   - ubooquity ...get('yourdomainhere')
 #   - plex ...get('yourdomainhere')
 
+import time
+import datetime
 import discord
 from discord.ext import commands
 from discord import Intents
 import requests
-import time
-import datetime
-from datetime import datetime
 
 # FILL IN.
 BOT_NAME = 'KRKE'
@@ -27,8 +26,9 @@ AUTO_ROLE_REASON = 'Autoassign-guest'
 # Welcome message
 WELCOME_CH = 'guest'
 WELCOME_MSG = 'Welcome to SERVERNAME '
-WELCOME_MSG_2 = " You've been assigned the role 'Guest'."
+WELCOME_MSG_2 = ". You've been assigned the role 'Guest'."
 
+# Discord intents. Required.
 client = commands.Bot(command_prefix='.', intents=Intents.all())
 
 
@@ -104,7 +104,7 @@ def complile_string(time_dict, start_string, end_with):
     if time_dict['minutes'] != 0:
         start_string += str(time_dict['minutes']) + 'm '
     if time_dict['seconds'] != 0:
-        start_string += str(time_dict['seconds']) + 's '
+        start_string += str(time_dict['seconds']) + 's'
     # Add to end of string.
     start_string += end_with
     # Return compiled string.
@@ -116,7 +116,7 @@ def bot_uptime():
     # Calculate time bot has been running.
     time_since_start_seconds = time.time() - START_TIME
     # Convert seconds to readable format.
-    uptime = complile_string(split_seconds(time_since_start_seconds), BOT_NAME + ' has been running for ', '.')
+    uptime = complile_string(split_seconds(time_since_start_seconds), '{0.user} has been running for '.format(client), '.')
     # Return string.
     return uptime
 
@@ -149,7 +149,7 @@ def next_reboot_date():
 # Check how long it is until the next reboot (6:30)
 def bot_reboot():
     # Get seconds until reboot, convert into more readable format (string)
-    reboot_time = complile_string(split_seconds(next_reboot_date()), BOT_NAME + ' will reboot in ', '.')
+    reboot_time = complile_string(split_seconds(next_reboot_date()), '{0.user} will reboot in '.format(client), '.')
     # Return string.
     return reboot_time
 
@@ -165,8 +165,8 @@ async def on_connect():
 
 
 @client.event
-async def on_ready(self):
-    print('Logged on as {0}!'.format(self.user))
+async def on_ready():
+    print('Logged in as {0.user}!'.format(client))
     # assign bot avatar and name
     # await client.user.edit(avatar=image)
     await client.user.edit(username=BOT_NAME)
@@ -191,11 +191,13 @@ async def reboot(ctx):
 
 @client.event
 async def on_member_join(member):
-    print('Someone joined the server.')
+    print(member.display_name + ' joined the server.')
     # Auto assign Guest role to new members.
     role = discord.utils.get(member.guild.roles, name=AUTO_ROLE)
     await member.add_roles(role, reason=AUTO_ROLE_REASON)
     # Send welcome message in Guest chat.
+    # Quick and dirty sleep because msg is sent too fast.
+    time.sleep(1.0)
     channel = discord.utils.get(member.guild.channels, name=WELCOME_CH)
     await channel.send(WELCOME_MSG + member.mention + WELCOME_MSG_2)
 
