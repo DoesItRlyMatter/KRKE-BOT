@@ -132,7 +132,7 @@ def next_reboot_date():
     # Check if current time is between 6:30 and 23:59:59.
     if REBOOT_TIME < datetime.time(hour, minute, 0) < datetime.time(23, 59, 59):
         # Save reboot date in var.
-        reboot_date = nextday_date.replace(hour=6, minute=30, second=0, microsecond=0)
+        reboot_date = nextday_date.replace(hour=REBOOT_TIME.hour, minute=REBOOT_TIME.minute, second=0, microsecond=0)
     # get seconds until reboot.
     until_reboot = reboot_date - current_date
     # Return time until reboot in seconds
