@@ -91,7 +91,7 @@ def split_seconds(seconds):
 
 
 # Convert split_time dict to string (String xD xH xM xS)
-def complile_string(time_dict, start_string):
+def complile_string(time_dict, start_string, end_with):
     if time_dict['days'] != 0:
         start_string += str(time_dict['days']) + 'd '
     if time_dict['hours'] != 0:
@@ -100,6 +100,8 @@ def complile_string(time_dict, start_string):
         start_string += str(time_dict['minutes']) + 'm '
     if time_dict['seconds'] != 0:
         start_string += str(time_dict['seconds']) + 's '
+    # Add to end of string.
+    start_string += end_with
     # Return compiled string.
     return start_string
 
@@ -109,7 +111,7 @@ def bot_uptime():
     # Calculate time bot has been running.
     time_since_start_seconds = time.time() - START_TIME
     # Convert seconds to readable format.
-    uptime = complile_string(split_seconds(time_since_start_seconds), 'Bot has been running for ')
+    uptime = complile_string(split_seconds(time_since_start_seconds), BOT_NAME + ' has been running for ', '.')
     # Return string.
     return uptime
 
@@ -142,7 +144,7 @@ def next_reboot_date():
 # Check how long it is until the next reboot (6:30)
 def bot_reboot():
     # Get seconds until reboot, convert into more readable format (string)
-    reboot_time = complile_string(split_seconds(next_reboot_date()), 'Bot rebooting in ')
+    reboot_time = complile_string(split_seconds(next_reboot_date()), BOT_NAME + ' will reboot in ', '.')
     # Return string.
     return reboot_time
 
