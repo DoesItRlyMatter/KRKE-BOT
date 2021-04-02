@@ -1,6 +1,8 @@
 # NOTES FOR USAGE
 # FILL IN THE FOLLOWING:
+#   - BOT_NAME
 #   - TOKEN
+#   - REBOOT_TIME (HOUR, MINUTE, SECOND)
 #   - teamspeak ...?address=YOUR TEAMSPEAK ADDRESS HERE
 #   - bitwarden ...get('yourdomainhere')
 #   - ubooquity ...get('yourdomainhere')
@@ -11,9 +13,13 @@ from discord.ext import commands
 from discord import Intents
 import requests
 import time
+from datetime import datetime
+import datetime
 
+# FILL IN.
 BOT_NAME = 'KRKE'
 TOKEN = ''
+REBOOT_TIME = datetime.time(6, 30, 0)
 START_TIME = time.time()
 
 client = commands.Bot(command_prefix='.', intents=Intents.all())
@@ -108,6 +114,39 @@ def bot_uptime():
     return uptime
 
 
+# Check if time is between specified times.
+def next_reboot_date():
+    # get current date.
+    current_date = datetime.datetime.now()
+    # next days date.
+    nextday_date = current_date + datetime.timedelta(days=1)
+    # Save hour and minute in integer variables for easier use.
+    # Hour
+    hour = int(time.strftime('%H', current_date.timetuple()))
+    # Minute
+    minute = int(time.strftime('%M', current_date.timetuple()))
+    # Check if current time is between 00:00 and 6:30.
+    if datetime.time(0, 0, 0) < datetime.time(hour, minute, 0) < REBOOT_TIME:
+        # Save reboot date in var.
+        reboot_date = current_date.replace(hour=REBOOT_TIME.hour, minute=REBOOT_TIME.minute, second=0, microsecond=0)
+    # Check if current time is between 6:30 and 23:59:59.
+    if REBOOT_TIME < datetime.time(hour, minute, 0) < datetime.time(23, 59, 59):
+        # Save reboot date in var.
+        reboot_date = nextday_date.replace(hour=6, minute=30, second=0, microsecond=0)
+    # get seconds until reboot.
+    until_reboot = reboot_date - current_date
+    # Return time until reboot in seconds
+    return until_reboot.seconds
+
+
+# Check how long it is until the next reboot (6:30)
+def bot_reboot():
+    # Get seconds until reboot, convert into more readable format (string)
+    reboot_time = complile_string(split_seconds(next_reboot_date()), 'Bot rebooting in ')
+    # Return string.
+    return reboot_time
+
+
 # Get bot avatar.
 # with open('bot_avatar.jpg', 'rb') as f:
     # image = f.read()
@@ -136,6 +175,11 @@ async def server(ctx):
 @client.command(aliases=['upt'])
 async def uptime(ctx):
     await ctx.send('```diff\n' + bot_uptime() + '```')
+
+
+@client.command(aliases=['r', 'restart'])
+async def reboot(ctx):
+    await ctx.send('```diff\n' + bot_reboot() + '```')
 
 
 @client.event
