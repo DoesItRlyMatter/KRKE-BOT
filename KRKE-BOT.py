@@ -181,12 +181,12 @@ async def server(ctx):
 
 @client.command(aliases=['upt'])
 async def uptime(ctx):
-    await ctx.send('```diff\n' + bot_uptime() + '```')
+    await ctx.send('```fix\n' + bot_uptime() + '```')
 
 
 @client.command(aliases=['r', 'restart'])
 async def reboot(ctx):
-    await ctx.send('```diff\n' + bot_reboot() + '```')
+    await ctx.send('```fix\n' + bot_reboot() + '```')
 
 
 @client.event
