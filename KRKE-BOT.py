@@ -13,14 +13,21 @@ from discord.ext import commands
 from discord import Intents
 import requests
 import time
-from datetime import datetime
 import datetime
+from datetime import datetime
 
 # FILL IN.
 BOT_NAME = 'KRKE'
 TOKEN = ''
 REBOOT_TIME = datetime.time(6, 30, 0)
 START_TIME = time.time()
+# Role to autoassign.
+AUTO_ROLE = 'Guest'
+AUTO_ROLE_REASON = 'Autoassign-guest'
+# Welcome message
+WELCOME_CH = 'guest'
+WELCOME_MSG = 'Welcome to SERVERNAME '
+WELCOME_MSG_2 = " You've been assigned the role 'Guest'."
 
 client = commands.Bot(command_prefix='.', intents=Intents.all())
 
@@ -154,12 +161,12 @@ def bot_reboot():
 
 @client.event
 async def on_connect():
-    print(BOT_NAME + ' connected to discord.')
+    print('Connected to discord.')
 
 
 @client.event
-async def on_ready():
-    print(BOT_NAME + ' ready!')
+async def on_ready(self):
+    print('Logged on as {0}!'.format(self.user))
     # assign bot avatar and name
     # await client.user.edit(avatar=image)
     await client.user.edit(username=BOT_NAME)
@@ -185,8 +192,11 @@ async def reboot(ctx):
 @client.event
 async def on_member_join(member):
     print('Someone joined the server.')
-    role = discord.utils.get(member.guild.roles, name='Guest')
-    await member.add_roles(role, reason='Autoassign-guest')
-
+    # Auto assign Guest role to new members.
+    role = discord.utils.get(member.guild.roles, name=AUTO_ROLE)
+    await member.add_roles(role, reason=AUTO_ROLE_REASON)
+    # Send welcome message in Guest chat.
+    channel = discord.utils.get(member.guild.channels, name=WELCOME_CH)
+    await channel.send(WELCOME_MSG + member.mention + WELCOME_MSG_2)
 
 client.run(TOKEN)
