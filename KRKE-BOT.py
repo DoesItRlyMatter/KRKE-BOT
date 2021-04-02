@@ -30,6 +30,8 @@ WELCOME_MSG_2 = ". You've been assigned the role 'Guest'."
 
 # Discord intents. Required.
 client = commands.Bot(command_prefix='.', intents=Intents.all())
+# Remove default help command. Implement custom later.
+client.remove_command('help')
 
 
 def server_status():
@@ -187,6 +189,22 @@ async def uptime(ctx):
 @client.command(aliases=['r', 'restart'])
 async def reboot(ctx):
     await ctx.send('```fix\n' + bot_reboot() + '```')
+
+
+# Temporary help command. Redo in future.
+@client.command(aliases=['c', 'h', 'help', 'command'])
+async def commands(ctx):
+    await ctx.send('```fix\n' +
+                   'Available commands: \n\n' +
+                   ' - .server (aliases: .s, .status)\n' +
+                   '     Status of services on ANTNAS Server.\n\n' +
+                   ' - .uptime (aliases: .upt)\n' +
+                   "     Shows {0.user}'s uptime.\n\n".format(client) +
+                   ' - .reboot (aliases: .r, .restart)\n' +
+                   "     Shows time until {0.user}'s daily restart.\n\n".format(client) +
+                   ' - .commands (aliases: .c, .command, .help, .h)\n' +
+                   '     Shows you this list dipshit.'
+                   + '```')
 
 
 @client.event
