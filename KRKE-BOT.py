@@ -154,12 +154,12 @@ def bot_reboot():
 
 @client.event
 async def on_connect():
-    print('Bot connected to discord.')
+    print(BOT_NAME + ' connected to discord.')
 
 
 @client.event
 async def on_ready():
-    print('Bot ready!')
+    print(BOT_NAME + ' ready!')
     # assign bot avatar and name
     # await client.user.edit(avatar=image)
     await client.user.edit(username=BOT_NAME)
