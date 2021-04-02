@@ -24,8 +24,6 @@ START_TIME = time.time()
 
 client = commands.Bot(command_prefix='.', intents=Intents.all())
 
-# call ts api, return true/false.
-
 
 def server_status():
     status = dict()
