@@ -71,6 +71,12 @@ def server_status():
     return status
 
 
+# get wan ip
+def get_wanip():
+    ip = requests.get('https://api.ipify.org').text
+    return ip.string
+
+
 # seconds split into days, hours, minutes and seconds.
 def split_seconds(seconds):
     # Dict for storing days, hours, minutes and seconds.
@@ -189,6 +195,11 @@ async def uptime(ctx):
 @client.command(aliases=['r', 'restart'])
 async def reboot(ctx):
     await ctx.send('```fix\n' + bot_reboot() + '```')
+
+
+@client.command(aliases=['ip', 'wanip'])
+async def ipaddress(ctx):
+    await ctx.send('```fix\n' + get_wanip() + '```')
 
 
 # Temporary help command. Redo in future.
