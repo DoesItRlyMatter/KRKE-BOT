@@ -23,6 +23,8 @@ START_TIME = time.time()
 # Role to autoassign.
 AUTO_ROLE = 'Guest'
 AUTO_ROLE_REASON = 'Autoassign-guest'
+# List of Admin channel names
+ADMIN_CHANNEL = ['general', 'private', 'bot-testing']
 # Welcome message
 WELCOME_CH = 'guest'
 WELCOME_MSG = 'Welcome to SERVERNAME '
@@ -74,7 +76,8 @@ def server_status():
 # get wan ip
 def get_wanip():
     ip = requests.get('https://api.ipify.org').text
-    return ip.string
+    ip = 'WAN IP: {0}'.format(ip)
+    return ip
 
 
 # seconds split into days, hours, minutes and seconds.
@@ -199,8 +202,10 @@ async def reboot(ctx):
 
 @client.command(aliases=['ip', 'wanip'])
 async def ipaddress(ctx):
-    await ctx.send('```fix\n' + get_wanip() + '```')
-
+    if ctx.channel.name in ADMIN_CHANNEL:
+        await ctx.send('```fix\n' + get_wanip() + '```')
+    else:
+        await ctx.send('```diff\n' + '- Command cannot be used in this channel.' + '```')
 
 # Temporary help command. Redo in future.
 @client.command(aliases=['c', 'h', 'help', 'command'])
