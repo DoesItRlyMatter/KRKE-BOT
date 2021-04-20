@@ -29,6 +29,14 @@ ADMIN_CHANNEL = ['general', 'private', 'bot-testing']
 WELCOME_CH = 'guest'
 WELCOME_MSG = 'Welcome to SERVERNAME '
 WELCOME_MSG_2 = ". You've been assigned the role 'Guest'."
+# List of web service urls
+SERVICE_URLS = {
+    'ts': 'https://api.cleanvoice.ru/ts3/?address=',
+    'nc': 'https://nextcloud',
+    'bt': 'https://bitwarden',
+    'ub': 'https://books',
+    'pl': 'https://plex'
+}
 
 # Discord intents. Required.
 client = commands.Bot(command_prefix='.', intents=Intents.all())
@@ -39,44 +47,53 @@ client.remove_command('help')
 def server_status():
     status = dict()
     # TS
-    teamspeak = requests.get('https://api.cleanvoice.ru/ts3/?address=')
+    teamspeak = requests.get(SERVICE_URLS['ts'])
     teamspeak = teamspeak.json()
     teamspeak = teamspeak['can_connect']
     if teamspeak is True:
-        status.update({"ts": "+ Teamspeak3  - OK!"})
+        status.update({"teamspeak": 'Online'})
     else:
-        status.update({"ts": "- Teamspeak3  - F"})
+        status.update({'teamspeak': 'F'})
     # NEXTCLOUD
-    nextcloud = requests.get('https://nextcloud')
+    nextcloud = requests.get(SERVICE_URLS['nc'])
     if nextcloud.status_code == 200:
-        status.update({"nextcloud": "+ Nextcloud   - OK!"})
+        status.update({'nextcloud': 'Online'})
     else:
-        status.update({"nextcloud": "- NextCloud   - F"})
+        status.update({'nextcloud': 'F'})
     # BITWARDEN
-    bitwarden = requests.get('https://bitwarden')
+    bitwarden = requests.get(SERVICE_URLS['bt'])
     if bitwarden.status_code == 200:
-        status.update({"bitwarden": "+ Bitwarden   - OK!"})
+        status.update({'bitwarden': 'Online'})
     else:
-        status.update({"bitwarden": "+ Bitwarden   - F"})
+        status.update({'bitwarden': 'F'})
     # UBOOQUITY
-    ubooquity = requests.get('https://books')
+    ubooquity = requests.get(SERVICE_URLS['ub'])
     if ubooquity.status_code == 200:
-        status.update({"books": "+ Ubooquity   - OK!"})
+        status.update({'ubooquity': 'Online'})
     else:
-        status.update({"books": "- Ubooquity   - F"})
+        status.update({'ubooquity': 'F'})
     # PLEX
-    plex = requests.get('https://plex')
+    plex = requests.get(SERVICE_URLS['pl'])
     if plex.status_code == 200:
-        status.update({"plex": "+ Plex        - OK!"})
+        status.update({'plex': 'Online'})
     else:
-        status.update({"plex": "- Plex        - F"})
+        status.update({'plex': 'F'})
+
+    # Check statuses to determine color
+    if ('F' in status.values()) is True:
+        print('F in status')
+        status.update({'color': 0xffe700})
+    elif ('F' not in status.values()) is False:
+        status.update({'color': 0xff0000})
+    else:
+        status.update({'color': 0x00ff00})
     return status
 
 
 # get wan ip
 def get_wanip():
     ip = requests.get('https://api.ipify.org').text
-    ip = 'WAN IP: {0}'.format(ip)
+    # ip = 'WAN IP: {0}'.format(ip)
     return ip
 
 
@@ -165,9 +182,16 @@ def bot_reboot():
     return reboot_time
 
 
+# Create embed with error message.
+def error_embed(error, desc, ctx_):
+    em = discord.Embed(title=error, description=desc, color=0xff0000)
+    em.set_footer(text=ctx_.author.display_name, icon_url=ctx_.author.avatar_url)
+    return em
+
+
 # Get bot avatar.
 # with open('bot_avatar.jpg', 'rb') as f:
-    # image = f.read()
+# image = f.read()
 
 
 @client.event
@@ -186,41 +210,54 @@ async def on_ready():
 @client.command(aliases=['s', 'status'])
 async def server(ctx):
     status = server_status()
-    await ctx.send('```diff\n' + status["nextcloud"] + '\n' + status["bitwarden"] + '\n' + status["books"] + '\n' + status["ts"] + '\n' +
-                   status["plex"] + '```')
+    em = discord.Embed(title='AntNAS Status', description='¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯', color=status['color'])
+    em.add_field(name='Nextcloud', value=status['nextcloud'], inline=False)
+    em.add_field(name='Bitwarden', value=status['bitwarden'], inline=False)
+    em.add_field(name='Ubooquity', value=status['ubooquity'], inline=False)
+    em.add_field(name='Teamspeak3', value=status['teamspeak'], inline=False)
+    em.add_field(name='Plex', value=status['plex'], inline=False)
+    em.set_footer(text=ctx.author.display_name, icon_url=ctx.author.avatar_url)
+
+    await ctx.send(embed=em)
+    await ctx.message.delete()
 
 
 @client.command(aliases=['upt'])
 async def uptime(ctx):
-    await ctx.send('```fix\n' + bot_uptime() + '```')
+    em = discord.Embed(description=bot_uptime(), color=0x00ff00)
+    em.set_footer(text=ctx.author.display_name, icon_url=ctx.author.avatar_url)
+    await ctx.send(embed=em)
+    await ctx.message.delete()
 
 
 @client.command(aliases=['r', 'restart'])
 async def reboot(ctx):
-    await ctx.send('```fix\n' + bot_reboot() + '```')
+    em = discord.Embed(description=bot_reboot(), color=0x00ff00)
+    em.set_footer(text=ctx.author.display_name, icon_url=ctx.author.avatar_url)
+    await ctx.send(embed=em)
+    await ctx.message.delete()
 
 
 @client.command(aliases=['ip', 'wanip'])
 async def ipaddress(ctx):
+    # Check if command is allowed in channel and send response.
     if ctx.channel.name in ADMIN_CHANNEL:
-        await ctx.send('```fix\n' + get_wanip() + '```')
+        em = discord.Embed(title='WAN IP', description=get_wanip(), color=0x00ff00)
+        em.set_footer(text=ctx.author.display_name, icon_url=ctx.author.avatar_url)
+        await ctx.send(embed=em)
+    # Command not allowed, send error.
     else:
-        await ctx.send('```diff\n' + '- Command cannot be used in this channel.' + '```')
+        em = error_embed('Error', 'Command cannot be used in this channel.', ctx)
+        await ctx.send(embed=em)
+    # delete command message.
+    await ctx.message.delete()
 
 # Temporary help command. Redo in future.
 @client.command(aliases=['c', 'h', 'help', 'command'])
 async def commands(ctx):
-    await ctx.send('```fix\n' +
-                   'Available commands: \n\n' +
-                   ' - .server (aliases: .s, .status)\n' +
-                   '     Status of services on ANTNAS Server.\n\n' +
-                   ' - .uptime (aliases: .upt)\n' +
-                   "     Shows {0.user}'s uptime.\n\n".format(client) +
-                   ' - .reboot (aliases: .r, .restart)\n' +
-                   "     Shows time until {0.user}'s daily restart.\n\n".format(client) +
-                   ' - .commands (aliases: .c, .command, .help, .h)\n' +
-                   '     Shows you this list dipshit.'
-                   + '```')
+    em = error_embed('Error', 'This function is under construction, will be added soon.', ctx)
+    await ctx.send(embed=em)
+    await ctx.message.delete()
 
 
 @client.event
