@@ -107,7 +107,7 @@ async def remind(ctx, day: con.validate_day, month: con.validate_month, year: co
         db.insert_entry(conn, c, comment, date, ctx.author.display_name, ctx.channel.id, ctx.author.id,
                         datetime.datetime.now().strftime('%d/%m/%Y %H:%M'))
         # Create embed for response.
-        em = discord.Embed(title='Reminder set', description='', color=0x00ff00)
+        em = discord.Embed(title='REMINDER SET', description='', color=0x00ff00)
         # em.add_field(name=date.strftime('%d %B %Y %H:%M'), value=comment, inline=False)
         em.add_field(name=date.strftime('%d/%m/%Y %H:%M'), value=comment, inline=False)
         em.set_footer(text=ctx.author.display_name, icon_url=ctx.author.avatar_url)
